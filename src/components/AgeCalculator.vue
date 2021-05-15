@@ -1,7 +1,7 @@
 <template>
     <div>
         <b-form class="container-fluid">
-            <label class="mb-1 bold font-weight-bold" style="font-size: 0.9rem;">{{baseResourceName}}</label>
+            <label class="mb-1 bold font-weight-bold" style="font-size: 0.9rem;">{{ageData.baseResourceName}}</label>
             <b-row>
                 <b-col><b-input v-model="baseResourceQuantity" size="sm" @change="timeUntilTarget"></b-input></b-col>
                 <b-col cols="5">{{baseResourceAdvancedQuantity}}</b-col>
@@ -21,14 +21,16 @@
         <b-form v-for="resource of resources" :key="resource.name" class="container-fluid mt-1">
             <label class="mb-1 bold font-weight-bold" style="font-size: 0.9rem;">{{resource.name}}</label>
             <b-row>
+                <b-col cols=3>Output:</b-col>
+                <b-col cols=1><b-button @click="divideOutput(resource)" tabindex="-1">&div;</b-button></b-col>
+                <b-col cols=3><b-input v-model="resource.output" size="sm"></b-input></b-col>
+                <b-col cols=1><b-button @click="multiplyOutput(resource)" tabindex="-1">x</b-button></b-col>
+                <b-col cols=4>{{resource.advancedOutput}}</b-col>
+            </b-row>
+            <b-row>
                 <b-col cols=4>Quantity:</b-col>
                 <b-col cols=4><b-input v-model="resource.quantity" size="sm"></b-input></b-col>
                 <b-col cols=4>{{resource.advancedQuantity}}</b-col>
-            </b-row>
-            <b-row>
-                <b-col cols=4>Output:</b-col>
-                <b-col cols=4><b-input v-model="resource.output" size="sm"></b-input></b-col>
-                <b-col cols=4>{{resource.advancedOutput}}</b-col>
             </b-row>
         </b-form>
     </div>
@@ -38,8 +40,7 @@
     export default {
         name: 'AgeCalculator',
         props: {
-            baseResourceName: String,
-            resourceNames: Array,
+            ageData: Object,
             advanceBy: Number
         },
         data() {
@@ -54,7 +55,11 @@
             }
         },
         created() {
-            this.resources = this.resourceNames.map(n => {
+            this.setNewAge();
+        },
+        methods: {
+            setNewAge() {
+                this.resources = this.ageData.resourceNames.map(n => {
                 return {
                     name: n,
                     quantity: '0',
@@ -64,13 +69,12 @@
                     outputPerResource: 0,
                     advancedQuantity: '0',
                     advancedOutput: '0'
-                }
-            });
+                    }
+                });
 
-            // TODO - sort this out
-            this.loadState();
-        },
-        methods: {
+                // TODO - sort this out
+                this.loadState();
+            },
             advanceTime(seconds) {
                 let computedResources = [];
                 let lastNonZeroResource = this.resources.length;
@@ -175,14 +179,6 @@
                     totalSeconds = xnext;
                 }
 
-                // for (let rr = 0; rr < roots[0].length; rr++) {
-                //     // Get real, positive root
-                //     if (roots[0][rr] > 0 && roots[1][rr] < 1e-10 && roots[1][rr] > -1e-10) {
-                //         totalSeconds = roots[0][rr];
-                //         break;
-                //     }
-                // }
-
                 const hours = Math.floor(totalSeconds / 3600);
                 const minutes = Math.floor((totalSeconds % 3600) / 60);
                 const seconds = Math.round(totalSeconds % 60);
@@ -257,7 +253,7 @@
                 return value;
             },
             storeState() {
-                localStorage.setItem(this.baseResourceName, JSON.stringify(this.resources));
+                localStorage.setItem(this.ageData.baseResourceName, JSON.stringify(this.resources));
             },
             loadState() {
                 const state = localStorage.getItem(this.baseResourceName);
@@ -265,6 +261,12 @@
             },
             getOutputWithCrit(n) {
                 return (1 - this.critRate) * n + this.critRate * this.critBonus * n;
+            },
+            multiplyOutput(resource) {
+                resource.output = this.getTextFromNumber(resource.outputNum * (this.ageData.individualMultiplier ?? 2))
+            },
+            divideOutput(resource) {
+                resource.output = this.getTextFromNumber(resource.outputNum / (this.ageData.individualMultiplier ?? 2))
             }
         },
         computed: {
@@ -277,6 +279,9 @@
             }
         },
         watch: {
+            ageData() {
+                this.setNewAge();
+            },
             resourceValues(newVal, oldVal) {
                 for (let r of this.resources) {
                     r.quantityNum = this.getNumberFromText(r.quantity);
