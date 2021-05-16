@@ -45,6 +45,7 @@ export default {
   watch: {
     value(val) {
       this.internalValue = val;
+      if (!this.focused) this.formatDisplayValue();
     },
     internalValue() {
       this.$emit('input', this.internalValue);

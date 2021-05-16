@@ -3,35 +3,35 @@
         <b-form class="container-fluid mt-2">
             <b-row>
                 <b-col>
-                    <b-form-group label="Current quantity" label-for="current-quantity-input">
+                    <b-form-group label="Current quantity" :label-for="getId('current-quantity-input')">
                         <ad-number-input 
                             v-model="baseResourceQuantity" 
                             size="sm" 
                             @input="onFieldInput" 
-                            id="current-quantity-input">
+                            :id="getId('current-quantity-input')">
                         </ad-number-input>
                     </b-form-group>
                 </b-col>
                 <b-col>
-                    <b-form-group label="Luck %" label-for="crit-rate-input">
+                    <b-form-group label="Luck %" :label-for="getId('crit-rate-input')">
                         <b-input 
                             v-model="critRatePercent" 
                             size="sm" 
                             @input="onFieldInput" 
-                            id="crit-rate-input">
+                            :id="getId('crit-rate-input')">
                         </b-input>
                     </b-form-group>
                 </b-col>
                 <b-col>
-                    <b-form-group label="Bonus" label-for="bonus-input">
-                        <b-input v-model="critBonus" size="sm" @input="onFieldInput" id="bonus-input"></b-input>
+                    <b-form-group label="Bonus" :label-for="getId('bonus-input')">
+                        <b-input v-model="critBonus" size="sm" @input="onFieldInput" :id="getId('bonus-input')"></b-input>
                     </b-form-group>
                 </b-col>
             </b-row>
             <b-row>
                 <b-col>
-                    <b-form-group label="Target" label-for="target-input">
-                        <ad-number-input v-model="targetQuantity" size="sm" @input="onFieldInput" id="target-input"></ad-number-input>
+                    <b-form-group label="Target" :label-for="getId('target-input')">
+                        <ad-number-input v-model="targetQuantity" size="sm" @input="onFieldInput" :id="getId('target-input')"></ad-number-input>
                     </b-form-group>
                 </b-col>
                 <b-col>
@@ -45,7 +45,7 @@
                     <b-button variant="outline-danger" size="sm" class="mr-2" @click="multiplyAll(0.5)">All &div;2</b-button>
                     <b-button variant="outline-success" size="sm" @click="multiplyAll(2)">All &times;2</b-button>
                 </b-col>
-                <b-col cols="8" class="text-right">
+                <b-col class="text-right">
                     <b-button variant="primary" size="sm" @click="reset">Reset</b-button>
                 </b-col>
             </b-row>
@@ -111,6 +111,7 @@ export default {
       critBonus: 256,
       timeToTarget: 'No target',
       targetQuantity: 0,
+      id: Math.random().toString(36).substr(2, 5)
     };
   },
   created() {
@@ -304,6 +305,9 @@ export default {
         resource.quantity = 0;
       }
     },
+    getId(text) {
+      return `${text}_${this.id}`;
+    }
   },
   computed: {
     resourceValues() {
